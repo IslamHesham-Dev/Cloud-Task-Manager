@@ -118,13 +118,13 @@ Create a `.env` file in the backend directory with the following variables:
 
 ```
 TASKS_TABLE=CloudTaskManager-tasks
-ATTACH_BUCKET=cloud-taskmgr-attachments-122610479020
-USER_POOL_ID=us-east-1_OAush5WW0
-USER_POOL_CLIENT=2e57revu20opqsvg7ubq0h1op1
-IDENTITY_POOL_ID=us-east-1:98cb4c16-b1a6-4f97-99ad-f486172ea36a
-NOTIF_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/123456789012/task-notifications
-DB_CLUSTER_ARN=arn:aws:rds:us-east-1:123456789012:cluster:taskmgr-db
-DB_SECRET_ARN=arn:aws:secretsmanager:us-east-1:123456789012:secret:taskmgr-db-credentials
+ATTACH_BUCKET=cloud-taskmgr-attachments-122610479020rdgdr
+USER_POOL_ID=us-east-1_OAush5WW0drgdrg
+USER_POOL_CLIENT=2e57revu20opqsvg7ubq0h1op1rgrgdr
+IDENTITY_POOL_ID=us-east-1:98cb4c16-b1a6-4f97-99ad-f486172ea36adrgdr
+NOTIF_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/123456789012/task-notificationsdrgdr
+DB_CLUSTER_ARN=arn:aws:rds:us-east-1:123456789012:cluster:taskmgr-dbddrgdr
+DB_SECRET_ARN=arn:aws:secretsmanager:us-east-1:123456789012:secret:taskmgr-db-credentialsdrgdr
 DB_NAME=taskmgrdb
 SES_FROM_EMAIL=notifications@yourdomain.com
 ```
