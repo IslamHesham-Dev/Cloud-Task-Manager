@@ -1,0 +1,210 @@
+service: cloud-taskmgr-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: us-east-1
+
+  environment:
+    TASKS_TABLE: Tasks
+    ATTACH_BUCKET: cloud-taskmgr-attachments-122610479020
+    USER_POOL_ID: us-east-1_OAush5WW0
+    USER_POOL_CLIENT: 2e57revu20opqsvg7ubq0h1op1
+    IDENTITY_POOL_ID: us-east-1:98cb4c16-b1a6-4f97-99ad-f486172ea36a
+    NOTIF_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/122610479020/TaskNotificationsQueue
+    DB_CLUSTER_ARN: arn:aws:rds:us-east-1:122610479020:cluster:cloudtaskmgr-serverless
+    DB_SECRET_ARN: arn:aws:secretsmanager:us-east-1:122610479020:secret:rds!cluster-d8bc1f4f-efba-44a9-96f8-84f76970beef-3svaYx
+    DB_NAME: cloudtaskmgr
+    SES_FROM_EMAIL: islam@digitalnesthub.co
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - rds-data:ExecuteStatement
+          Resource:
+            - arn:aws:rds:us-east-1:122610479020:cluster:cloudtaskmgr-serverless
+
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource:
+            - arn:aws:secretsmanager:us-east-1:122610479020:secret:CloudTaskMgr-Serverless-Secret-5djbBz
+            - arn:aws:secretsmanager:us-east-1:122610479020:secret:CloudTaskMgr-Serverless-Secret2-ZJYlOj
+            - arn:aws:secretsmanager:us-east-1:122610479020:secret:rds!cluster-d8bc1f4f-efba-44a9-96f8-84f76970beef-3svaYx
+
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: "*"
+
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - arn:aws:dynamodb:us-east-1:122610479020:table/Tasks
+
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+          Resource:
+            - arn:aws:sqs:us-east-1:122610479020:TaskNotificationsQueue
+
+functions:
+
+  signUp:
+    handler: handlers/auth.signUp
+    events:
+      - http:
+          path: signup
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+
+  confirmSignUp:
+    handler: handlers/auth.confirmSignUp
+    events:
+      - http:
+          path: confirm
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+
+  signIn:
+    handler: handlers/auth.signIn
+    events:
+      - http:
+          path: signin
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+
+  getTasks:
+    handler: handlers/tasks.getTasks
+    events:
+      - http:
+          path: tasks
+          method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+          authorizer:
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:us-east-1:122610479020:userpool/${self:provider.environment.USER_POOL_ID}
+
+  createTask:
+    handler: handlers/tasks.createTask
+    events:
+      - http:
+          path: tasks
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+          authorizer:
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:us-east-1:122610479020:userpool/${self:provider.environment.USER_POOL_ID}
+
+  updateTask:
+    handler: handlers/tasks.updateTask
+    events:
+      - http:
+          path: tasks/{id}
+          method: patch
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+          authorizer:
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:us-east-1:122610479020:userpool/${self:provider.environment.USER_POOL_ID}
+
+  deleteTask:
+    handler: handlers/tasks.deleteTask
+    events:
+      - http:
+          path: tasks/{id}
+          method: delete
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+          authorizer:
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:us-east-1:122610479020:userpool/${self:provider.environment.USER_POOL_ID}
+
+  generateUploadUrl:
+    handler: handlers/attachments.generateUploadUrl
+    events:
+      - http:
+          path: tasks/{id}/attachment
+          method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+          authorizer:
+            type: COGNITO_USER_POOLS
+            arn: arn:aws:cognito-idp:us-east-1:122610479020:userpool/${self:provider.environment.USER_POOL_ID}
+
+  notify:
+    handler: handlers/notification.handler
+    events:
+      - sqs:
+          arn: arn:aws:sqs:us-east-1:122610479020:TaskNotificationsQueue
